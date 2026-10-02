@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ứng dụng Quản lý Công việc - Mobile Task Manager</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex justify-center items-center p-0 sm:p-4">
+
+  <!-- Container Giả lập Khung Mobile -->
+  <div class="w-full max-w-md bg-white min-h-screen sm:min-h-[844px] sm:max-h-[844px] sm:rounded-[36px] shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/60">
+
+    <!-- ==================== 1. MÀN HÌNH ĐĂNG NHẬP (LOGIN) ==================== -->
+    <div id="screen-login" class="flex-1 flex flex-col justify-center px-6 py-12 bg-white">
+      <div class="mb-8 text-center">
+        <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-200 mb-4">
+          <i data-lucide="check-square" class="w-8 h-8 text-white"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800">Chào mừng trở lại!</h1>
+        <p class="text-slate-500 text-sm mt-1">Đăng nhập để quản lý công việc của bạn</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Tên đăng nhập</label>
+          <div class="relative">
+            <i data-lucide="user" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <input type="text" id="username" required placeholder="Nhập username..."
+              class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" value="nguyenvana">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Mật khẩu</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <input type="password" id="password" required placeholder="••••••••"
+              class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" value="123456">
+          </div>
+        </div>
+
+        <button type="submit"
+          class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all text-sm mt-2">
+          Đăng nhập
+        </button>
+      </form>
+
+      <div class="mt-8 text-center">
+        <a href="#" onclick="alert('Tính năng đăng ký đang được phát triển!')" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">
+          Chưa có tài khoản? <span class="underline">Đăng ký ngay</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ==================== 2. MÀN HÌNH DASHBOARD (TASK DASHBOARD) ==================== -->
+    <div id="screen-dashboard" class="flex-1 flex flex-col bg-slate-50 hidden">
+      <!-- Header Bar -->
+      <div class="bg-white px-6 pt-8 pb-5 border-b border-slate-100 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3.5">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Avatar" class="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-500/20">
+          <div>
+            <h2 class="font-bold text-slate-800 text-base leading-tight">Nguyễn Văn A</h2>
+            <p class="text-xs font-medium text-slate-400 mt-0.5">ID: <span class="text-indigo-600 font-semibold">abc123</span> • Quản lý dự án</p>
+          </div>
+        </div>
+        <button onclick="navigate('screen-login')" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors" title="Đăng xuất">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Main Scroll Content -->
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6 hide-scrollbar">
+
+        <!-- Nhóm 1: Công việc hôm nay -->
+        <section>
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-slate-800 text-base">Công việc hôm nay</h3>
+              <span id="today-count" class="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-full">0</span>
+            </div>
+            <button onclick="navigate('screen-create')"
+              class="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-md shadow-indigo-200 transition-all active:scale-95" title="Thêm công việc">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- List Task Hôm Nay -->
+          <div id="today-task-list" class="space-y-2.5">
+            <!-- Render động bằng JS -->
+          </div>
+        </section>
+
+        <!-- Nhóm 2: Công việc sắp tới -->
+        <section>
+          <div class="flex items-center justify-between mb-3.5">
+            <h3 class="font-bold text-slate-800 text-base">Công việc sắp tới</h3>
+            <span id="upcoming-count" class="text-xs text-slate-400 font-medium">0 task</span>
+          </div>
+
+          <!-- Cards List Công Việc Sắp Tới -->
+          <div id="upcoming-task-list" class="space-y-3">
+            <!-- Render động bằng JS -->
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ==================== 3. MÀN HÌNH THÊM CÔNG VIỆC MỚI (CREATE TASK) ==================== -->
+    <div id="screen-create" class="flex-1 flex flex-col bg-white hidden">
+      <!-- Header Bar -->
+      <div class="px-6 pt-8 pb-4 border-b border-slate-100 flex items-center justify-between">
+        <button onclick="navigate('screen-dashboard')" class="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors flex items-center space-x-1">
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          <span class="text-sm font-medium">Quay lại</span>
+        </button>
+        <h2 class="font-bold text-slate-800 text-base">Thêm mới</h2>
+        <div class="w-12"></div> <!-- Placeholder căn giữa -->
+      </div>
+
+      <!-- Form Input -->
+      <form id="create-task-form" onsubmit="handleCreateTask(event)" class="flex-1 flex flex-col px-6 py-6 space-y-5 justify-between">
+        <div class="space-y-4">
+          <!-- Tên công việc -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Tên công việc <span class="text-red-500">*</span></label>
+            <input type="text" id="task-name" required placeholder="Nhập tên công việc..."
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+
+          <!-- Thời gian hoàn thành -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Thời gian hoàn thành <span class="text-red-500">*</span></label>
+            <input type="datetime-local" id="task-datetime" required
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+
+          <!-- Ghi chú -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Ghi chú</label>
+            <textarea id="task-note" rows="4" placeholder="Nhập chi tiết ghi chú..."
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+          class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all text-sm">
+          Lưu / Tạo công việc
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- JavaScript State Management & Navigation -->
+  <script>
+    // State quản lý danh sách công việc
+    let tasks = [
+      { id: 1, title: "Họp review thiết kế UI/UX", dateTime: "2026-10-02T14:00", note: "Thảo luận lại luồng đăng ký tài khoản", completed: false, category: "today" },
+      { id: 2, title: "Gửi báo cáo tiến độ tuần", dateTime: "2026-10-02T17:30", note: "Tổng hợp chỉ số từ các team", completed: true, category: "today" },
+      { id: 3, title: "Kiểm thử hệ thống thanh toán", dateTime: "2026-10-05T09:00", note: "Test tích hợp cổng VNPay", completed: false, category: "upcoming" },
+      { id: 4, title: "Lập kế hoạch Sprint tiếp theo", dateTime: "2026-10-08T10:30", note: "Chuẩn bị backlog cho phiên họp grooming", completed: false, category: "upcoming" }
+    ];
+
+    // Điều hướng giữa các màn hình
+    function navigate(screenId) {
+      document.querySelectorAll('#screen-login, #screen-dashboard, #screen-create').forEach(el => el.classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+      if (screenId === 'screen-dashboard') {
+        renderTasks();
+      }
+      lucide.createIcons();
+    }
+
+    // Xử lý sự kiện đăng nhập
+    function handleLogin(e) {
+      e.preventDefault();
+      navigate('screen-dashboard');
+    }
+
+    // Đánh dấu hoàn thành / chưa hoàn thành Task
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        renderTasks();
+      }
+    }
+
+    // Xử lý tạo Task mới
+    function handleCreateTask(e) {
+      e.preventDefault();
+      const name = document.getElementById('task-name').value;
+      const dateTime = document.getElementById('task-datetime').value;
+      const note = document.getElementById('task-note').value;
+
+      // Phân loại tự động theo ngày được chọn
+      const taskDate = new Date(dateTime).toDateString();
+      const todayDate = new Date().toDateString();
+      const category = taskDate === todayDate ? 'today' : 'upcoming';
+
+      const newTask = {
+        id: Date.now(),
+        title: name,
+        dateTime: dateTime,
+        note: note,
+        completed: false,
+        category: category
+      };
+
+      tasks.push(newTask);
+      document.getElementById('create-task-form').reset();
+      navigate('screen-dashboard');
+    }
+
+    // Định dạng thời gian hiển thị
+    function formatTime(dtStr) {
+      if (!dtStr) return '';
+      const dt = new Date(dtStr);
+      return dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + dt.toLocaleDateString('vi-VN');
+    }
+
+    // Render danh sách công việc ra UI
+    function renderTasks() {
+      const todayListEl = document.getElementById('today-task-list');
+      const upcomingListEl = document.getElementById('upcoming-task-list');
+
+      const todayTasks = tasks.filter(t => t.category === 'today');
+      const upcomingTasks = tasks.filter(t => t.category === 'upcoming');
+
+      document.getElementById('today-count').innerText = todayTasks.length;
+      document.getElementById('upcoming-count').innerText = `${upcomingTasks.length} task`;
+
+      // Render Task Hôm Nay
+      if (todayTasks.length === 0) {
+        todayListEl.innerHTML = `<p class="text-xs text-slate-400 italic py-2">Chưa có công việc nào hôm nay.</p>`;
+      } else {
+        todayListEl.innerHTML = todayTasks.map(t => `
+          <div class="flex items-start space-x-3 bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm transition-all hover:border-slate-200">
+            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})"
+              class="mt-0.5 w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer accent-indigo-600">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold ${t.completed ? 'line-through text-slate-400' : 'text-slate-800'} leading-snug">${t.title}</p>
+              ${t.note ? `<p class="text-xs text-slate-400 mt-1 line-clamp-1">${t.note}</p>` : ''}
+              <span class="inline-flex items-center text-[10px] font-medium text-slate-400 mt-1.5">
+                <i data-lucide="clock" class="w-3 h-3 mr-1"></i> ${formatTime(t.dateTime)}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Task Sắp Tới
+      if (upcomingTasks.length === 0) {
+        upcomingListEl.innerHTML = `<p class="text-xs text-slate-400 italic py-2">Chưa có công việc sắp tới.</p>`;
+      } else {
+        upcomingListEl.innerHTML = upcomingTasks.map(t => `
+          <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 rounded-md">Sắp tới</span>
+              <span class="text-xs text-indigo-600 font-medium flex items-center">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1"></i> ${formatTime(t.dateTime)}
+              </span>
+            </div>
+            <h4 class="font-semibold text-slate-800 text-sm">${t.title}</h4>
+            ${t.note ? `<p class="text-xs text-slate-500 leading-relaxed">${t.note}</p>` : ''}
+          </div>
+        `).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    // Khởi tạo ban đầu
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
